@@ -115,10 +115,20 @@ MSG
   fi
 fi
 
-# Check PR body for Glossary section
-if echo "$COMMAND" | grep -q '\-\-body'; then
+# Check PR body for Glossary section (--body … but not --body-file …)
+if echo "$COMMAND" | grep -qE '\-\-body([[:space:]]|[\"'"'"'])'; then
   if ! echo "$COMMAND" | grep -qiE '##\s*(Glossary|glossary)'; then
     ERRORS="${ERRORS}PR body missing required '## Glossary' section.\n"
+  fi
+fi
+
+# When body is passed via --body-file, read the file (tool input does not expand $()).
+if echo "$COMMAND" | grep -qE '\-\-body-file'; then
+  BODY_FILE=$(echo "$COMMAND" | sed -nE 's/.*--body-file[[:space:]]+([^[:space:]]+).*/\1/p' | head -1)
+  if [ -n "$BODY_FILE" ] && [ -r "$BODY_FILE" ]; then
+    if ! grep -qiE '##[[:space:]]*(Glossary|glossary)' "$BODY_FILE"; then
+      ERRORS="${ERRORS}PR body file missing required '## Glossary' section.\n"
+    fi
   fi
 fi
 
