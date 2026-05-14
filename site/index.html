@@ -1814,9 +1814,18 @@ confirm it skips the missing column before merge."</span></pre>
   ['mouseenter', 'focus', 'touchstart'].forEach(function (ev) {
     a.addEventListener(ev, assemble, { once: false, passive: true });
   });
-  // Safety net: if someone clicks before any of the above fire (keyboard
-  // activation on some browsers), assemble first and let the click proceed.
-  a.addEventListener('click', assemble);
+  // Safety net: assemble on click. If href was still "#", some UAs navigate
+  // to the fragment instead of following the mailto set in the same handler;
+  // prevent that and hand off explicitly.
+  a.addEventListener('click', function (e) {
+    var before = a.getAttribute('href') || '';
+    assemble();
+    var after = a.getAttribute('href') || '';
+    if (before === '#' && after.indexOf('mailto:') === 0) {
+      e.preventDefault();
+      window.location.href = after;
+    }
+  });
 })();
 
 // ---- full lifecycle shell animation (hero) ----

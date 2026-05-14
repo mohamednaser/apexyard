@@ -29,7 +29,7 @@
 # Company Information
 # -----------------------------------------------------------------------------
 company:
-  name: "Your Company Name"
+  name: "Naser Company "
   mission: "What you're building and why"
   vision: "Where you're headed long-term"
   website: "https://yourcompany.com"
@@ -42,8 +42,8 @@ company:
 
   # What kind of software you build
   products:
-    - name: "Main Product"
-      description: "Brief description of what it does"
+    - name: "Blog Generator"
+      description: "AI Blog Generator is a web-based platform that enables content creators, marketers, and SEO professionals to produce high-quality, fully-structured blog posts through an AI-guided, multi-step wizard. The product removes the friction of blank-page writing by providing a structured, iterative workflow that covers every phase — from ideation to a humanized final draft — while keeping the user in full control at each step."
       type: "web-app"  # web-app, mobile-app, api, cli, library, saas
 
 # -----------------------------------------------------------------------------
@@ -61,23 +61,26 @@ company:
 #   Data:        head-of-data, data-analyst, data-engineer
 #
 team:
-  - name: "Team Lead"
+  - name: "Mohamed Naser"
     role: "tech-lead"
     department: "engineering"
 
-  - name: "Developer 1"
+  - name: "Nour"
     role: "backend-engineer"
     department: "engineering"
 
-  - name: "Developer 2"
+  - name: "Hossam "
     role: "frontend-engineer"
     department: "engineering"
 
-  # Uncomment and add more team members as needed:
-  # - name: "PM"
-  #   role: "product-manager"
-  #   department: "product"
-  #
+  - name: "Tarek "
+    role: "qa-engineer"
+    department: "engineering"
+
+  - name: "Amar"
+    role: "product-manager"
+    department: "product"
+  
   # - name: "Designer"
   #   role: "ux-designer"
   #   department: "design"
