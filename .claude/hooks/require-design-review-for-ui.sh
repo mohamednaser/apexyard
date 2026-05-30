@@ -146,13 +146,32 @@ MSG
   exit 2
 fi
 
-# SHA consistency check — resolve the PR's real HEAD via GitHub rather than
-# local HEAD (see #55). Falls back to local HEAD with a warning if the
-# gh call fails (network, auth).
+# SHA consistency check — resolve the PR's real HEAD via GitHub (see #55).
+# If gh is unreachable, fall back to Rex+design marker consensus when they
+# agree; same-repo only then falls back to local HEAD with a warning.
 APPROVED_SHA=$(tr -d '[:space:]' < "$APPROVAL")
 CURRENT_SHA=$(resolve_pr_head "$PR_NUMBER" "$CMD_REPO")
 if [ -z "$CURRENT_SHA" ]; then
-  echo "WARN: Could not resolve PR #${PR_NUMBER} HEAD via gh — falling back to local HEAD. If this merge fails, run 'gh pr checkout ${PR_NUMBER}' first or re-authenticate gh." >&2
+  echo "WARN: Could not resolve PR #${PR_NUMBER} HEAD via gh." >&2
+  REX_M="${REPO_ROOT:-.}/.claude/session/reviews/${PR_NUMBER}-rex.approved"
+  if [ -f "$REX_M" ]; then
+    REX_CONS=$(tr -d '[:space:]' < "$REX_M")
+    if [ -n "$REX_CONS" ] && [ -n "$APPROVED_SHA" ] && [ "$REX_CONS" = "$APPROVED_SHA" ]; then
+      echo "NOTE: Using Rex+design marker SHA (${REX_CONS:0:7}) because gh could not resolve the live PR head in this environment." >&2
+      CURRENT_SHA="$REX_CONS"
+    fi
+  fi
+fi
+if [ -z "$CURRENT_SHA" ]; then
+  if [ -n "$CMD_REPO" ]; then
+    cat >&2 <<MSG
+BLOCKED: Cannot verify PR #${PR_NUMBER} on ${CMD_REPO} (gh unreachable) for design-review SHA check.
+
+Fix gh auth/network, or merge from a shell where \`gh pr view ${PR_NUMBER} --repo ${CMD_REPO}\` works.
+MSG
+    exit 2
+  fi
+  echo "WARN: Falling back to local HEAD. If this merge fails, run 'gh pr checkout ${PR_NUMBER}' first or re-authenticate gh." >&2
   CURRENT_SHA=$(git rev-parse HEAD 2>/dev/null)
 fi
 if [ -n "$APPROVED_SHA" ] && [ -n "$CURRENT_SHA" ] && [ "$APPROVED_SHA" != "$CURRENT_SHA" ]; then

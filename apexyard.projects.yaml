@@ -59,7 +59,7 @@ projects:
   # Example 1: a customer-facing web app, fully active
   # ---------------------------------------------------------------------------
   - name: blog-generator
-    repo: mohamednaseramein/blog-generator
+    repo: mohamednaser/blog-generator
     workspace: workspace/blog-generator
     docs: projects/ai-blog-generator
     status: active
@@ -72,6 +72,23 @@ projects:
     tags:
       - customer-facing
       - revenue
+    ticket_prefix: GH
+
+  - name: portfolio
+    repo: mohamednaser/portfolio
+    workspace: workspace/portfolio
+    docs: projects/portfolio
+    status: handover
+    tier: P2
+    roles:
+      - tech-lead
+      - frontend-engineer
+      - backend-engineer
+      - security-auditor
+    tags:
+      - personal
+      - static-site
+      - github-pages
     ticket_prefix: GH
 
   # ---------------------------------------------------------------------------

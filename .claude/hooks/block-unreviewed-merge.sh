@@ -77,7 +77,31 @@ CEO_APPROVAL="${REVIEWS_DIR}/${PR_NUMBER}-ceo.approved"
 # a transient network / auth issue doesn't brick merges entirely.
 CURRENT_SHA=$(resolve_pr_head "$PR_NUMBER" "$CMD_REPO")
 if [ -z "$CURRENT_SHA" ]; then
-  echo "WARN: Could not resolve PR #${PR_NUMBER} HEAD via gh — falling back to local HEAD. If this merge fails, run 'gh pr checkout ${PR_NUMBER}' first or re-authenticate gh." >&2
+  echo "WARN: Could not resolve PR #${PR_NUMBER} HEAD via gh." >&2
+  # When merging a PR in another repo via `--repo` / `gh api .../pulls/N/merge`,
+  # falling back to *this* workspace's `git rev-parse HEAD` is almost always
+  # wrong (ops-repo HEAD != PR HEAD) and produces false "stale approval" blocks.
+  # If Rex and CEO already agree on one SHA, use that as the verification target
+  # when GitHub is unreachable from the hook environment.
+  if [ -f "$REX_APPROVAL" ] && [ -f "$CEO_APPROVAL" ]; then
+    REX_CONS=$(tr -d '[:space:]' < "$REX_APPROVAL")
+    CEO_CONS=$(tr -d '[:space:]' < "$CEO_APPROVAL")
+    if [ -n "$REX_CONS" ] && [ "$REX_CONS" = "$CEO_CONS" ]; then
+      echo "NOTE: Using Rex+CEO marker SHA (${REX_CONS:0:7}) because gh could not resolve the live PR head in this environment." >&2
+      CURRENT_SHA="$REX_CONS"
+    fi
+  fi
+fi
+if [ -z "$CURRENT_SHA" ]; then
+  if [ -n "$CMD_REPO" ]; then
+    cat >&2 <<MSG
+BLOCKED: Cannot verify PR #${PR_NUMBER} on ${CMD_REPO} (gh unreachable) and Rex/CEO markers are missing or disagree.
+
+Fix gh auth/network for this environment, or merge from a shell where \`gh pr view ${PR_NUMBER} --repo ${CMD_REPO}\` works.
+MSG
+    exit 2
+  fi
+  echo "WARN: Falling back to local HEAD. If this merge fails, run 'gh pr checkout ${PR_NUMBER}' first or re-authenticate gh." >&2
   CURRENT_SHA=$(git rev-parse HEAD 2>/dev/null)
 fi
 
