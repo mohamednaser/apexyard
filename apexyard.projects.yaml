@@ -61,7 +61,7 @@ projects:
   - name: blog-generator
     repo: mohamednaser/blog-generator
     workspace: workspace/blog-generator
-    docs: projects/ai-blog-generator
+    docs: projects/blog-generator
     status: active
     tier: P0
     roles:
